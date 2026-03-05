@@ -1,96 +1,63 @@
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
-// Keep a global reference of the window object
-let mainWindow;
+const isDev = process.env.NODE_ENV === 'development';
+const isKiosk = process.env.KIOSK_MODE === 'true';
 
 function createWindow() {
-  // Create the browser window
-  mainWindow = new BrowserWindow({
+  const windowOptions = {
     width: 1280,
-    height: 800,
-    minWidth: 800,
-    minHeight: 600,
+    height: 720,
     webPreferences: {
-      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      webSecurity: true,
-      allowRunningInsecureContent: false,
+      nodeIntegration: false,
     },
-    // Kiosk mode options (can be enabled via command line or settings)
-    fullscreen: process.argv.includes('--kiosk'),
-    kiosk: process.argv.includes('--kiosk'),
-    autoHideMenuBar: true,
-    titleBarStyle: 'default',
-  });
+    icon: path.join(__dirname, '../public/icon.png'),
+    show: false,
+  };
 
-  // Load the app
-  const isDev = process.env.NODE_ENV === 'development';
-  
-  if (isDev) {
-    mainWindow.loadURL('http://localhost:3000');
-    mainWindow.webContents.openDevTools();
-  } else {
-    // Load the built Next.js app
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  if (isKiosk) {
+    windowOptions.fullscreen = true;
+    windowOptions.kiosk = true;
+    windowOptions.autoHideMenuBar = true;
   }
 
-  // Block external navigation - only allow YouTube embeds
-  mainWindow.webContents.on('will-navigate', (event, url) => {
-    const allowedHosts = [
-      'www.youtube-nocookie.com',
-      'youtube-nocookie.com',
-    ];
+  const win = new BrowserWindow(windowOptions);
+
+  // Load the app
+  if (isDev) {
+    win.loadURL('http://localhost:3000');
+    win.webContents.openDevTools();
+  } else {
+    win.loadFile(path.join(__dirname, '../out/index.html'));
+  }
+
+  win.once('ready-to-show', () => {
+    win.show();
+  });
+
+  // Prevent external navigation (keep kids in the app)
+  win.webContents.on('will-navigate', (event, url) => {
+    const allowedHosts = ['localhost', 'www.youtube-nocookie.com'];
+    const parsedUrl = new URL(url);
     
-    const urlObj = new URL(url);
-    
-    // Allow navigation to YouTube embeds only
-    if (!allowedHosts.includes(urlObj.hostname)) {
+    if (!allowedHosts.includes(parsedUrl.hostname)) {
       event.preventDefault();
-      console.log('Blocked navigation to:', url);
     }
-  });
-
-  // Block new window creation (popups)
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    console.log('Blocked popup:', url);
-    return { action: 'deny' };
-  });
-
-  // Handle external links
-  mainWindow.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-    console.log('Blocked new window:', url);
-  });
-
-  // Emitted when the window is closed
-  mainWindow.on('closed', () => {
-    mainWindow = null;
   });
 }
 
-// Create window when Electron is ready
 app.whenReady().then(createWindow);
 
-// Quit when all windows are closed
 app.on('window-all-closed', () => {
-  // On macOS, keep the app running unless Cmd+Q is pressed
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
 app.on('activate', () => {
-  // On macOS, recreate window when dock icon is clicked
-  if (mainWindow === null) {
+  if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
-});
-
-// Security: Prevent new window creation
-app.on('web-contents-created', (event, contents) => {
-  contents.on('new-window', (event, navigationUrl) => {
-    event.preventDefault();
-    console.log('Blocked new window from web-contents:', navigationUrl);
-  });
 });

@@ -2,84 +2,55 @@
   "name": "kids-tv-app",
   "version": "1.0.0",
   "private": true,
-  "description": "Safe video app for kids ages 3-8 - Curated content, no ads, no algorithms",
-  "author": "Kids TV App",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "next lint",
     "electron:dev": "NODE_ENV=development electron electron/main.js",
     "electron:build": "npm run build && electron-builder",
-    "electron:pack": "electron-builder --dir",
-    "dist": "npm run build && electron-builder",
-    "dist:mac": "npm run build && electron-builder --mac",
-    "dist:win": "npm run build && electron-builder --win",
-    "dist:linux": "npm run build && electron-builder --linux"
+    "electron:build:kiosk": "npm run build && KIOSK_MODE=true electron-builder",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "lucide-react": "^0.400.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5"
   },
   "build": {
-    "appId": "com.kidstv.app",
+    "appId": "com.yourname.kids-tv",
     "productName": "Kids TV",
     "directories": {
-      "output": "release"
+      "output": "dist"
     },
     "files": [
-      "dist/**/*",
+      "out/**/*",
       "electron/**/*"
     ],
     "mac": {
-      "target": [
-        {
-          "target": "dmg",
-          "arch": ["x64", "arm64"]
-        }
-      ],
-      "category": "public.app-family.kids"
+      "target": "dmg"
     },
     "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        }
-      ]
+      "target": "nsis"
     },
     "linux": {
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": ["x64", "arm64"]
-        },
-        {
-          "target": "deb",
-          "arch": ["x64", "arm64"]
-        }
-      ],
-      "category": "Education"
+      "target": "AppImage",
+      "category": "Video"
     }
-  },
-  "dependencies": {
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.577.0",
-    "next": "16.1.6",
-    "radix-ui": "^1.4.3",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "tailwind-merge": "^3.5.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "electron": "^40.7.0",
-    "electron-builder": "^26.8.1",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "shadcn": "^3.8.5",
-    "tailwindcss": "^4",
-    "tw-animate-css": "^1.4.0",
-    "typescript": "^5"
   }
 }

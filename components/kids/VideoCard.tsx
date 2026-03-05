@@ -1,49 +1,37 @@
 'use client';
 
-import { Video, Channel } from '@/types';
-import { Card } from '@/components/ui/card';
 import Image from 'next/image';
+import { Video } from '@/types';
 
 interface VideoCardProps {
   video: Video;
-  channel: Channel | undefined;
   onClick: () => void;
 }
 
-export function VideoCard({ video, channel, onClick }: VideoCardProps) {
+export function VideoCard({ video, onClick }: VideoCardProps) {
   return (
-    <Card
+    <button
       onClick={onClick}
-      className="overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-xl border-4 border-transparent hover:border-sky-400"
-      style={{ borderRadius: '1rem' }}
+      className="group relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-200 hover:ring-4 hover:ring-blue-400 transition-all focus:outline-none focus:ring-4 focus:ring-blue-500"
+      style={{ minHeight: '180px' }}
     >
-      <div className="relative aspect-video bg-gray-100">
-        <Image
-          src={video.thumbnail}
-          alt={video.title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        {channel && (
-          <div
-            className="absolute top-2 left-2 px-3 py-1 rounded-full text-white text-sm font-bold"
-            style={{ backgroundColor: channel.color }}
-          >
-            {channel.name}
-          </div>
-        )}
-      </div>
-      <div className="p-4 bg-white">
-        <h3 className="text-lg font-bold text-gray-800 line-clamp-2">
+      <Image
+        src={video.thumbnail}
+        alt={video.title}
+        fill
+        className="object-cover group-hover:scale-105 transition-transform"
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <h3 className="text-white font-bold text-lg leading-tight line-clamp-2">
           {video.title}
         </h3>
-        {video.description && (
-          <p className="text-sm text-gray-500 mt-1 line-clamp-1">
-            {video.description}
-          </p>
-        )}
+        <p className="text-white/80 text-sm mt-1">{video.channel}</p>
       </div>
-    </Card>
+      <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+        {video.duration}
+      </div>
+    </button>
   );
 }
